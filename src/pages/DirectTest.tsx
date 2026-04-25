@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DIRECT_ITEMS_SEMI_SOLID, DIRECT_ITEMS_LIQUID, DIRECT_ITEMS_SOLID } from '../data';
+import CartoonModal from '../components/CartoonModal';
+
+const CARTOON_MAP: Record<string, Record<number, string>> = {
+  'semi-solid': { 0: '/cartoon/semi-1.png', 1: '/cartoon/semi-2.png', 2: '/cartoon/semi-3.png', 3: '/cartoon/semi-4.png' },
+  liquid:      { 0: '/cartoon/liquid-1.png', 1: '/cartoon/liquid-2.png', 2: '/cartoon/semi-3.png', 3: '/cartoon/semi-4.png' },
+  solid:       { 0: '/cartoon/solid-1.png', 1: '/cartoon/solid-2.png', 2: '/cartoon/semi-3.png', 3: '/cartoon/semi-4.png' },
+};
 
 const DirectTest: React.FC = () => {
   const { phase } = useParams<{phase: string}>();
@@ -12,6 +19,7 @@ const DirectTest: React.FC = () => {
   const [stopInfo, setStopInfo] = useState({ phase: '', reason: '' });
   const [phaseScore, setPhaseScore] = useState(0);
   const [indirectScore, setIndirectScore] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('guss_t_indirect');
@@ -37,6 +45,8 @@ const DirectTest: React.FC = () => {
   };
 
   const phaseInfo = getPhaseLabel();
+  const currentPhase = phase || 'semi-solid';
+  const cartoonImg = CARTOON_MAP[currentPhase]?.[step] || '/cartoon/semi-1.png';
 
   const handleAnswer = (score: number, stop?: boolean, _value?: string) => {
     const newScore = phaseScore + score;
@@ -44,12 +54,12 @@ const DirectTest: React.FC = () => {
 
     if (stop) {
       setStopped(true);
-      const phaseKey = phase === 'liquid' ? 'liquid' : phase === 'solid' ? 'solid' : 'semiSolid';
+      const phaseKey = currentPhase === 'liquid' ? 'liquid' : currentPhase === 'solid' ? 'solid' : 'semiSolid';
       const updatedScores = { ...scores, [phaseKey]: score };
       localStorage.setItem(`guss_t_${phaseKey}`, JSON.stringify(score));
       localStorage.setItem('guss_t_result', JSON.stringify({
         stop: true,
-        stopPhase: phase,
+        stopPhase: currentPhase,
         stopReason: items[step].question,
         scores: updatedScores,
         indirectScore,
@@ -63,15 +73,15 @@ const DirectTest: React.FC = () => {
     if (step < items.length - 1) {
       setStep(step + 1);
     } else {
-      const phaseKey = phase === 'liquid' ? 'liquid' : phase === 'solid' ? 'solid' : 'semiSolid';
+      const phaseKey = currentPhase === 'liquid' ? 'liquid' : currentPhase === 'solid' ? 'solid' : 'semiSolid';
       const updatedScores = { ...scores, [phaseKey]: newScore };
       setScores(updatedScores);
       localStorage.setItem(`guss_t_${phaseKey}`, JSON.stringify(newScore));
 
-      if (phase === 'semi-solid') {
+      if (currentPhase === 'semi-solid') {
         if (newScore < 5) { navigate('/result'); return; }
         setTimeout(() => navigate('/direct-test/liquid'), 500);
-      } else if (phase === 'liquid') {
+      } else if (currentPhase === 'liquid') {
         if (newScore < 5) { navigate('/result'); return; }
         setTimeout(() => navigate('/direct-test/solid'), 500);
       } else {
@@ -141,10 +151,25 @@ const DirectTest: React.FC = () => {
           </div>
         )}
         <div className="question-desc">{item.description}</div>
-        <div className="cartoon-box">
-          <span className="cartoon-icon">{item.typeIcon}</span>
-          <div className="cartoon-text"><strong>📌 操作提示</strong>{item.cartoonHint}</div>
+
+        {/* Cartoon Box — clickable modal trigger */}
+        <div
+          className="cartoon-box"
+          style={{ cursor: 'pointer' }}
+          onClick={() => setModalOpen(true)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setModalOpen(true)}
+          aria-label="點擊查看操作示意圖"
+        >
+          <span className="cartoon-icon">📖</span>
+          <div className="cartoon-text">
+            <strong>📌 操作提示 — 點我看圖</strong>
+            <div style={{ marginTop: 4, fontSize: 12, color: '#888' }}>{item.cartoonHint}</div>
+          </div>
+          <span style={{ marginLeft: 'auto', fontSize: 20, flexShrink: 0 }}>🔍</span>
         </div>
+
         <div className="options">
           {item.options.map((opt, i) => (
             <button key={i} className={`option-btn ${opt.stop ? 'stop-warning' : ''}`} onClick={() => handleAnswer(opt.score, opt.stop, opt.value)}>
@@ -157,10 +182,20 @@ const DirectTest: React.FC = () => {
       </div>
 
       <div className="btn-group" style={{marginTop:8}}>
-        <button className="btn btn-secondary" onClick={() => phase === 'semi-solid' ? navigate('/indirect-test') : navigate('/direct-test/semi-solid')}>
+        <button className="btn btn-secondary" onClick={() => currentPhase === 'semi-solid' ? navigate('/indirect-test') : navigate('/direct-test/semi-solid')}>
           ← 上一步
         </button>
       </div>
+
+      {/* Cartoon Modal */}
+      {modalOpen && (
+        <CartoonModal
+          src={cartoonImg}
+          alt={item.question}
+          caption={item.cartoonHint}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
