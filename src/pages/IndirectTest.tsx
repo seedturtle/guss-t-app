@@ -68,7 +68,7 @@ const IndirectTest: React.FC = () => {
         </div>
         {item.description && <div className="question-desc">{item.description}</div>}
         <div className="cartoon-box">
-          <span className="cartoon-icon">👩‍⚕️</span>
+          <span className="cartoon-icon">🎨</span>
           <div className="cartoon-text"><strong>📌 操作提示</strong>{item.cartoonHint}</div>
         </div>
         <div className="options">
