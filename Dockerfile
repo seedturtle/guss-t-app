@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build && npm prune --omit=dev
+RUN npm run build
 
 EXPOSE 8080
 
