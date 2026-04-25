@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 export default defineConfig({
   server: { host: '0.0.0.0', port: 8080 },
+  preview: { host: '0.0.0.0', port: 8080, allowedHosts: ['guss-t.zeabur.app'] },
   build: { outDir: 'dist', sourcemap: false },
 });
