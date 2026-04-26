@@ -70,7 +70,7 @@ export const DIRECT_ITEMS_SEMI_SOLID: DirectTestItem[] = [
     volumeHint: '約 2.5 - 7.5 毫升（1-5 茶匙）',
     cartoonHint: '🥣 護理師以湯匙餵食增稠水（IDDSI Level 3），患者順利吞嚥',
     options: [
-      { label: '無法吞嚥', value: '無法', score: 0, stop: true },
+      { label: '無法吞嚥', value: '無法', score: 0 },
       { label: '延遲吞嚥（>2 秒）', value: '延遲', score: 1, stop: true },
       { label: '成功吞嚥', value: '成功', score: 2 },
     ],
@@ -85,7 +85,7 @@ export const DIRECT_ITEMS_SEMI_SOLID: DirectTestItem[] = [
     description: '觀察患者在吞嚥前、吞嚥中、吞嚥後三分鐘內是否有咳嗽',
     cartoonHint: '😮‍💨 患者吞嚥時皺眉咳嗽，護理師表情擔憂並準備停止',
     options: [
-      { label: '是（觀察到咳嗽）', value: '是', score: 0, stop: true },
+      { label: '是（觀察到咳嗽）', value: '是', score: 0 },
       { label: '否（無咳嗽）', value: '否', score: 1 },
     ],
   },
@@ -99,7 +99,7 @@ export const DIRECT_ITEMS_SEMI_SOLID: DirectTestItem[] = [
     description: '觀察患者口腔是否有流出液體的現象',
     cartoonHint: '💦 患者下巴有口水，護理師持纸巾輕輕擦拭並觀察',
     options: [
-      { label: '是', value: '是', score: 0, stop: true },
+      { label: '是', value: '是', score: 0 },
       { label: '否', value: '否', score: 1 },
     ],
   },
@@ -113,7 +113,7 @@ export const DIRECT_ITEMS_SEMI_SOLID: DirectTestItem[] = [
     description: '請患者說「哦」，聆聽吞嚥後的嗓音是否有濕濡或沙啞聲',
     cartoonHint: '🗣️ 醫護仔細聆聽患者說「哦」的嗓音，觀察是否有異常',
     options: [
-      { label: '是（嗓音改變）', value: '是', score: 0, stop: true },
+      { label: '是（嗓音改變）', value: '是', score: 0 },
       { label: '否（嗓音正常）', value: '否', score: 1 },
     ],
   },
@@ -131,7 +131,7 @@ export const DIRECT_ITEMS_LIQUID: DirectTestItem[] = [
     volumeHint: '3 → 5 → 10 → 20 → 50 毫升',
     cartoonHint: '💧 護理師以有刻度的杯子餵水，患者逐步增加攝取量',
     options: [
-      { label: '無法吞嚥', value: '無法', score: 0, stop: true },
+      { label: '無法吞嚥', value: '無法', score: 0 },
       { label: '延遲吞嚥（>2 秒）', value: '延遲', score: 1, stop: true },
       { label: '成功吞嚥', value: '成功', score: 2 },
     ],
@@ -146,7 +146,7 @@ export const DIRECT_ITEMS_LIQUID: DirectTestItem[] = [
     description: '觀察患者在吞嚥前、吞嚥中、吞嚥後三分鐘內是否有咳嗽',
     cartoonHint: '😮‍💨 患者嗆咳，水珠噴出，立即停止餵水並記錄',
     options: [
-      { label: '是（觀察到咳嗽）', value: '是', score: 0, stop: true },
+      { label: '是（觀察到咳嗽）', value: '是', score: 0 },
       { label: '否（無咳嗽）', value: '否', score: 1 },
     ],
   },
@@ -160,7 +160,7 @@ export const DIRECT_ITEMS_LIQUID: DirectTestItem[] = [
     description: '觀察患者口腔是否有流出液體的現象',
     cartoonHint: '💦 患者口腔有液體流出，護理師觀察並記錄情形',
     options: [
-      { label: '是', value: '是', score: 0, stop: true },
+      { label: '是', value: '是', score: 0 },
       { label: '否', value: '否', score: 1 },
     ],
   },
@@ -174,7 +174,7 @@ export const DIRECT_ITEMS_LIQUID: DirectTestItem[] = [
     description: '請患者說「哦」，聆聽吞嚥後的嗓音是否有濕濡或沙啞聲',
     cartoonHint: '🗣️ 醫護使用聽診器聆聽患者嗓音，確認是否有濕濡聲',
     options: [
-      { label: '是（嗓音改變）', value: '是', score: 0, stop: true },
+      { label: '是（嗓音改變）', value: '是', score: 0 },
       { label: '否（嗓音正常）', value: '否', score: 1 },
     ],
   },
