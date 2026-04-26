@@ -33,8 +33,16 @@ const IndirectTest: React.FC = () => {
     if (next === 'stop') {
       const s = newAnswers.reduce((acc, v) => acc + v, 0);
       setIndirectScore(s);
-      setStopReason(label);
-      setStopped(true);
+      // 直接跳轉到結果頁，不停留在當前畫面
+      localStorage.setItem('guss_t_indirect', JSON.stringify({ answers: newAnswers, score: s }));
+      localStorage.setItem('guss_t_result', JSON.stringify({
+        stop: true,
+        stopReason: label,
+        scores: { semiSolid: 0, liquid: 0, solid: 0 },
+        indirectScore: s,
+        total: s,
+      }));
+      navigate('/result');
       return;
     }
     if (step < INDIRECT_ITEMS.length - 1) {

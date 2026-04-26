@@ -39,62 +39,70 @@ const DirectTest: React.FC = () => {
   const items = getItems();
 
   const getPhaseLabel = () => {
-    if (phase === 'liquid') return { icon: '💧', label: '液體測試', cls: 'liquid', hint: '使用杯子，依序給予 3 → 5 → 10 → 20 → 50 毫升的水' };
-    if (phase === 'solid') return { icon: '🍞', label: '固體測試', cls: 'solid', hint: '給予去邊吐司、去皮饅頭或餅乾（不超過 1.5cm × 1.5cm）' };
-    return { icon: '🥣', label: '半固體測試', cls: 'semi-solid', hint: '給予半茶匙（約 2.5ml）增稠水，然後可再給予 3-5 茶匙' };
+    if (phase === 'liquid') return { icon: '💧', label: '液體測試', cls: 'liquid' };
+    if (phase === 'solid') return { icon: '🍞', label: '固體測試', cls: 'solid' };
+    return { icon: '🥣', label: '半固體測試', cls: 'semi-solid' };
   };
 
   const phaseInfo = getPhaseLabel();
   const currentPhase = phase || 'semi-solid';
   const cartoonImg = CARTOON_MAP[currentPhase]?.[step] || '/cartoon/semi-1.png';
 
-  const handleAnswer = (score: number, stop?: boolean, _value?: string) => {
-    const newScore = phaseScore + score;
-    setPhaseScore(newScore);
+  const saveResult = (finalScores: typeof scores, totalScore: number, stop: boolean, stopReason?: string, stopPhase?: string) => {
+    localStorage.setItem('guss_t_result', JSON.stringify({
+      stop,
+      stopReason,
+      stopPhase,
+      scores: finalScores,
+      indirectScore,
+      total: totalScore,
+      semiSolid: finalScores.semiSolid,
+      liquid: finalScores.liquid,
+      solid: finalScores.solid,
+    }));
+  };
+
+  const handleAnswer = (score: number, stop?: boolean) => {
+    const newPhaseScore = phaseScore + score;
+    setPhaseScore(newPhaseScore);
 
     if (stop) {
-      setStopped(true);
+      // 停止：將「此題得 0 分」加入，並立即跳轉結果頁
       const phaseKey = currentPhase === 'liquid' ? 'liquid' : currentPhase === 'solid' ? 'solid' : 'semiSolid';
-      const updatedScores = { ...scores, [phaseKey]: score };
-      localStorage.setItem(`guss_t_${phaseKey}`, JSON.stringify(score));
-      localStorage.setItem('guss_t_result', JSON.stringify({
-        stop: true,
-        stopPhase: currentPhase,
-        stopReason: items[step].question,
-        scores: updatedScores,
-        indirectScore,
-        total: indirectScore + score,
-      }));
+      const updatedScores = { ...scores, [phaseKey]: newPhaseScore };
       setScores(updatedScores);
-      setStopInfo({ phase: phaseInfo.label, reason: items[step].question });
+      localStorage.setItem(`guss_t_${phaseKey}`, JSON.stringify(newPhaseScore));
+      const totalScore = indirectScore + newPhaseScore;
+      saveResult(updatedScores, totalScore, true, items[step].question, phaseInfo.label);
+      navigate('/result');
       return;
     }
 
     if (step < items.length - 1) {
       setStep(step + 1);
     } else {
+      // 本階段全部完成，根據分數決定下一步
       const phaseKey = currentPhase === 'liquid' ? 'liquid' : currentPhase === 'solid' ? 'solid' : 'semiSolid';
-      const updatedScores = { ...scores, [phaseKey]: newScore };
+      const updatedScores = { ...scores, [phaseKey]: newPhaseScore };
       setScores(updatedScores);
-      localStorage.setItem(`guss_t_${phaseKey}`, JSON.stringify(newScore));
+      localStorage.setItem(`guss_t_${phaseKey}`, JSON.stringify(newPhaseScore));
 
-      if (currentPhase === 'semi-solid') {
-        if (newScore < 5) { navigate('/result'); return; }
-        setTimeout(() => navigate('/direct-test/liquid'), 500);
-      } else if (currentPhase === 'liquid') {
-        if (newScore < 5) { navigate('/result'); return; }
-        setTimeout(() => navigate('/direct-test/solid'), 500);
-      } else {
-        localStorage.setItem('guss_t_result', JSON.stringify({
-          stop: false,
-          scores: updatedScores,
-          indirectScore,
-          total: indirectScore + newScore,
-          semiSolid: updatedScores.semiSolid,
-          liquid: updatedScores.liquid,
-          solid: newScore,
-        }));
+      if (newPhaseScore < 5) {
+        // 1-4 分：停止，直接顯示結果
+        saveResult(updatedScores, indirectScore + newPhaseScore, false);
         navigate('/result');
+      } else {
+        // 5 分：進入下一階段
+        if (currentPhase === 'semi-solid') {
+          saveResult(updatedScores, indirectScore + newPhaseScore, false);
+          setTimeout(() => navigate('/direct-test/liquid'), 500);
+        } else if (currentPhase === 'liquid') {
+          saveResult(updatedScores, indirectScore + newPhaseScore, false);
+          setTimeout(() => navigate('/direct-test/solid'), 500);
+        } else {
+          saveResult(updatedScores, indirectScore + newPhaseScore, false);
+          navigate('/result');
+        }
       }
     }
   };
@@ -107,7 +115,6 @@ const DirectTest: React.FC = () => {
         <div className="header">
           <span className="header-icon">🛑</span>
           <h1>直接測試 - {phaseInfo.label} 停止</h1>
-          <p>根據 GUSS-T，由於觀察到異常指標，需終止測試</p>
         </div>
         <div className="stop-banner">
           <span className="stop-banner-icon">🛑</span>
@@ -132,7 +139,7 @@ const DirectTest: React.FC = () => {
 
       <div className="phase-dots">
         {['semi-solid','liquid','solid'].map(p => (
-          <div key={p} className={`phase-dot ${p === phase ? 'current' : scores[p === 'semi-solid' ? 'semiSolid' : p === 'liquid' ? 'liquid' : 'solid'] !== undefined ? 'completed' : 'pending'}`} />
+          <div key={p} className={`phase-dot ${p === phase ? 'current' : scores[p === 'semi-solid' ? 'semiSolid' : p === 'liquid' ? 'liquid' : 'solid'] !== 0 ? 'completed' : 'pending'}`} />
         ))}
       </div>
 
@@ -152,16 +159,7 @@ const DirectTest: React.FC = () => {
         )}
         <div className="question-desc">{item.description}</div>
 
-        {/* Cartoon Box — clickable modal trigger */}
-        <div
-          className="cartoon-box"
-          style={{ cursor: 'pointer' }}
-          onClick={() => setModalOpen(true)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && setModalOpen(true)}
-          aria-label="點擊查看操作示意圖"
-        >
+        <div className="cartoon-box" style={{ cursor: 'pointer' }} onClick={() => setModalOpen(true)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setModalOpen(true)} aria-label="點擊查看操作示意圖">
           <span className="cartoon-icon">📖</span>
           <div className="cartoon-text">
             <strong>📌 操作提示 — 點我看圖</strong>
@@ -172,7 +170,7 @@ const DirectTest: React.FC = () => {
 
         <div className="options">
           {item.options.map((opt, i) => (
-            <button key={i} className={`option-btn ${opt.stop ? 'stop-warning' : ''}`} onClick={() => handleAnswer(opt.score, opt.stop, opt.value)}>
+            <button key={i} className={`option-btn ${opt.stop ? 'stop-warning' : ''}`} onClick={() => handleAnswer(opt.score, opt.stop)}>
               <span className="option-icon">{i === 0 ? '🔴' : i === 1 ? '⚠️' : '✅'}</span>
               <span className="option-label">{opt.label}</span>
               <span className="option-score">({opt.score}分){opt.stop ? ' ⚠️停止' : ''}</span>
@@ -187,7 +185,6 @@ const DirectTest: React.FC = () => {
         </button>
       </div>
 
-      {/* Cartoon Modal */}
       {modalOpen && (
         <CartoonModal
           src={cartoonImg}
