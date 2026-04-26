@@ -37,7 +37,15 @@ const Home: React.FC = () => {
         ))}
       </div>
 
-      <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => navigate('/patient-info')}>
+      <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => {
+        // 清除上一次評估殘留資料，確保從頭開始
+        localStorage.removeItem('guss_t_info');
+        localStorage.removeItem('guss_t_indirect');
+        localStorage.removeItem('guss_t_semi');
+        localStorage.removeItem('guss_t_liquid');
+        localStorage.removeItem('guss_t_result');
+        navigate('/patient-info');
+      }}>
         🚀 開始評估
       </button>
 

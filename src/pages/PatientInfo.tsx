@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// 清除所有 GUSS-T 評估資料（每次開始新評估前執行）
+const clearGussData = () => {
+  localStorage.removeItem('guss_t_info');
+  localStorage.removeItem('guss_t_indirect');
+  localStorage.removeItem('guss_t_semi');
+  localStorage.removeItem('guss_t_liquid');
+  localStorage.removeItem('guss_t_result');
+};
 
 const PatientInfo: React.FC = () => {
   const navigate = useNavigate();
   const [info, setInfo] = useState({ patientName: '', date: '', examiner: '' });
 
+  // 進入頁面時自動清除上一次的殘留資料
+  useEffect(() => { clearGussData(); }, []);
+
   const handleNext = () => {
     if (!info.patientName || !info.date || !info.examiner) { alert('請填寫所有欄位'); return; }
+    clearGussData(); // 再次確認歸零
     localStorage.setItem('guss_t_info', JSON.stringify(info));
     navigate('/indirect-test');
   };

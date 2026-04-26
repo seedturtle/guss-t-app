@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { INDIRECT_ITEMS } from '../data';
 import CartoonModal from '../components/CartoonModal';
@@ -6,11 +6,21 @@ import CartoonModal from '../components/CartoonModal';
 const IndirectTest: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+  // 所有題目預設 0 分，新評估開始時明確歸零
   const [answers, setAnswers] = useState<number[]>([0, 0, 0, 0, 0]);
   const [stopped, setStopped] = useState(false);
   const [stopReason, setStopReason] = useState('');
   const [indirectScore, setIndirectScore] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // 每次進入測試，先清除上一次的殘留資料，確保全新開始
+  useEffect(() => {
+    localStorage.removeItem('guss_t_indirect');
+    localStorage.removeItem('guss_t_semi');
+    localStorage.removeItem('guss_t_liquid');
+    localStorage.removeItem('guss_t_result');
+    localStorage.removeItem('guss_t_info');
+  }, []);
 
   const currentItem = INDIRECT_ITEMS[step];
   const cartoonImg = `/cartoon/indirect-${step + 1}.png`;
