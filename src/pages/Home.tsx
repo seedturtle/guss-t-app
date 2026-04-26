@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const PDF_URL = 'https://drive.google.com/file/d/1upg6qz9lCLbOudrCx42txI6l1Ns7-zOh/view?usp=drive_link';
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
 
@@ -38,6 +40,16 @@ const Home: React.FC = () => {
       <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => navigate('/patient-info')}>
         🚀 開始評估
       </button>
+
+      <a href={PDF_URL} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginTop: 12 }}>
+        <button
+          className="btn btn-secondary"
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+          type="button"
+        >
+          📄 查看原始指導手冊 PDF
+        </button>
+      </a>
 
       <div style={{ textAlign: 'center', marginTop: 24, fontSize: 11, color: '#aaa' }}>
         資料來源：Trapl et al. (2007) Stroke, 38, 2948<br />
