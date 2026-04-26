@@ -24,6 +24,7 @@ const DirectTest: React.FC = () => {
   useEffect(() => {
     const stored = localStorage.getItem('guss_t_indirect');
     if (stored) setIndirectScore(JSON.parse(stored).score);
+    // Load completed phase scores from localStorage
     const semi = localStorage.getItem('guss_t_semi');
     const liq = localStorage.getItem('guss_t_liquid');
     const sol = localStorage.getItem('guss_t_solid');
@@ -32,7 +33,10 @@ const DirectTest: React.FC = () => {
       liquid: liq ? JSON.parse(liq) : 0,
       solid: sol ? JSON.parse(sol) : 0,
     });
-  }, []);
+    // Reset current phase scores — each phase starts fresh
+    setPhaseScores([0, 0, 0, 0]);
+    setStep(0);
+  }, [currentPhase]); // ← 關鍵：每次進入不同 phase 就重置
 
   const getItems = () => {
     if (currentPhase === 'liquid') return DIRECT_ITEMS_LIQUID;
@@ -77,8 +81,8 @@ const DirectTest: React.FC = () => {
           total: indirectScore + phaseTotal,
           semiSolid: phaseTotal, liquid: 0, solid: 0,
         }));
-        // 進入液體測試
-        setTimeout(() => navigate('/direct-test/liquid'), 500);
+        // 顯示過場訊息後進入液體測試 Step 1
+        setTimeout(() => { window.location.href = '/direct-test/liquid'; }, 600);
       } else if (currentPhase === 'liquid') {
         localStorage.setItem('guss_t_result', JSON.stringify({
           stop: false,
@@ -88,7 +92,7 @@ const DirectTest: React.FC = () => {
           semiSolid: updatedScores.semiSolid, liquid: phaseTotal, solid: 0,
         }));
         // 進入固體測試
-        setTimeout(() => navigate('/direct-test/solid'), 500);
+        setTimeout(() => { window.location.href = '/direct-test/solid'; }, 600);
       } else {
         // 固體是最後一 phase，顯示結果
         localStorage.setItem('guss_t_result', JSON.stringify({
