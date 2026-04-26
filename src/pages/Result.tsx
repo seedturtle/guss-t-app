@@ -38,16 +38,7 @@ const Result: React.FC = () => {
     return <div className="page"><div className="header"><h1>載入中...</h1></div></div>;
   }
 
-  const severityLabel = { normal: '✅ 正常 / 輕度障礙', mild: '⚠️ 輕度障礙', moderate: '🔴 中度障礙', severe: '🚫 重度障礙' };
-  const severityClass = result.severity;
-
-  const getTotalLabel = (total: number) => {
-    if (result.stopReason || result.severity === 'severe') return '🚫 需停止測試';
-    if (total === 20) return '✅ 完全正常';
-    if (total >= 15) return '⚠️ 輕度障礙';
-    if (total >= 10) return '🔴 中度障礙';
-    return '🚫 重度障礙';
-  };
+  const isIndirectStop = result.stopReason && result.severity === 'severe';
 
   return (
     <div className="page">
@@ -57,15 +48,33 @@ const Result: React.FC = () => {
         <p>{info?.patientName} · {info?.date} · 檢查人員：{info?.examiner}</p>
       </div>
 
+      {/* NPO Alert Banner — 間接測試低於5分時顯示 */}
+      {isIndirectStop && (
+        <div className="stop-banner" style={{ marginBottom: 16 }}>
+          <span className="stop-banner-icon">🚫</span>
+          <h3>間接吞嚥測試未通過（{result.indirectScore} / 5）</h3>
+          <p>依 GUSS-T 規範，間接測試未達 5 分，<strong>禁止由口進食</strong>（NPO）</p>
+        </div>
+      )}
+
       {/* Score Summary */}
       <div className="score-display">
-        <div className={`score-circle ${severityClass}`}>
+        <div className={`score-circle ${result.severity}`}>
           {result.totalScore}
         </div>
-        <div style={{fontSize:18, fontWeight:700, color: severityClass === 'normal' ? '#2e7d32' : severityClass === 'mild' ? '#f57f17' : '#c62828'}}>
-          {getTotalLabel(result.totalScore)}
+        <div style={{
+          fontSize: 18, fontWeight: 700,
+          color: result.severity === 'normal' ? '#2e7d32' : result.severity === 'mild' ? '#f57f17' : '#c62828'
+        }}>
+          {result.severity === 'normal' ? '✅ 完全正常' :
+           result.severity === 'mild' ? '⚠️ 輕度障礙' :
+           result.severity === 'moderate' ? '🔴 中度障礙' : '🚫 重度障礙'}
         </div>
-        <div style={{fontSize:12, color:'#888', marginTop:4}}>總分 {result.totalScore} / 20</div>
+        <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+          {isIndirectStop
+            ? `間接測試：${result.indirectScore} / 5（低於標準，停止評估）`
+            : `間接 + 直接測驗總分：${result.totalScore} / 20`}
+        </div>
       </div>
 
       {/* Score Breakdown */}
@@ -79,24 +88,22 @@ const Result: React.FC = () => {
         ].map(row => (
           <div key={row.label} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid #f0f0f0'}}>
             <span>{row.icon} {row.label}</span>
-            <span style={{fontWeight:700, color: row.score >= row.max ? '#2e7d32' : row.score >= row.max*0.5 ? '#f57f17' : '#c62828'}}>
+            <span style={{
+              fontWeight: 700,
+              color: row.score >= row.max ? '#2e7d32' : row.score >= row.max * 0.5 ? '#f57f17' : '#c62828'
+            }}>
               {row.score} / {row.max}
             </span>
           </div>
         ))}
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0 0', fontWeight:700, fontSize:16}}>
           <span>📊 總分</span>
-          <span style={{color: result.severity === 'normal' ? '#2e7d32' : result.severity === 'mild' ? '#f57f17' : '#c62828'}}>
+          <span style={{
+            color: result.severity === 'normal' ? '#2e7d32' : result.severity === 'mild' ? '#f57f17' : '#c62828'
+          }}>
             {result.totalScore} / 20
           </span>
         </div>
-      </div>
-
-      {/* Result Banner */}
-      <div className={`result-banner ${severityClass}`}>
-        <div style={{fontSize:14, marginBottom:4}}>嚴重程度</div>
-        <h2>{severityLabel[result.severity]}</h2>
-        {result.stopReason && <div style={{marginTop:8, fontSize:13, opacity:0.8}}>⛔ 停止原因：{result.stopReason}</div>}
       </div>
 
       {/* IDDSI Recommendation */}
@@ -112,9 +119,9 @@ const Result: React.FC = () => {
       {/* Recommendations */}
       <div className="card">
         <div className="card-title">💊 處置建議</div>
-        <ul className="rec-list">
+        <ul style={{ paddingLeft: 20, margin: '8px 0', lineHeight: 2 }}>
           {result.recommendations.map((rec, i) => (
-            <li key={i}><span className="rec-icon">{'➤'}</span>{rec}</li>
+            <li key={i} style={{ marginBottom: 6 }}>{rec}</li>
           ))}
         </ul>
       </div>
@@ -126,10 +133,11 @@ const Result: React.FC = () => {
       </div>
 
       <div className="btn-group">
-        <button className="btn btn-secondary" onClick={()=>navigate('/')}>← 回到首頁</button>
+        <button className="btn btn-secondary" onClick={() => navigate('/')}>← 回到首頁</button>
         <button className="btn btn-primary" onClick={() => window.print()}>🖨️ 列印結果</button>
       </div>
     </div>
   );
 };
+
 export default Result;
